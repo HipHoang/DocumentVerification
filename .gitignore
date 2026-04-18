@@ -1,0 +1,8 @@
+.env
+.env.local
+.env.*
+# Bỏ qua node_modules trong thư mục services
+services/node_modules/
+
+# Bỏ qua node_modules trong bất kỳ thư mục con nào khác
+**/node_modules/
