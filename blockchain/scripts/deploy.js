@@ -1,12 +1,21 @@
 const hre = require("hardhat");
 
 async function main() {
-  const Contract = await hre.ethers.getContractFactory("Certificate");
-  const contract = await Contract.deploy();
+  console.log("Đang bắt đầu deploy hợp đồng Certificate...");
 
-  await contract.waitForDeployment();
+  // Lấy contract factory
+  const Certificate = await hre.ethers.getContractFactory("Certificate");
 
-  console.log("Deployed to:", contract.target);
+  // Triển khai hợp đồng
+  const certificate = await Certificate.deploy();
+
+  // Đợi cho đến khi giao dịch hoàn tất (Ethers v6)
+  await certificate.waitForDeployment();
+
+  const address = await certificate.getAddress();
+  console.log("----------------------------------------------");
+  console.log(`Hợp đồng đã được deploy thành công tại: ${address}`);
+  console.log("----------------------------------------------");
 }
 
 main().catch((error) => {

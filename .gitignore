@@ -1,8 +1,12 @@
 .env
 .env.local
 .env.*
-# Bỏ qua node_modules trong thư mục services
-services/node_modules/
+blockchain/artifacts
+blockchain/cache
 
 # Bỏ qua node_modules trong bất kỳ thư mục con nào khác
 **/node_modules/
+
+.blackboxrules
+**/dist/
+TODO.md
