@@ -2,24 +2,27 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
-// Layout & Common Components
 import Layout from "./components/layout/Layout";
 import LandingPage from "./components/pages/auth/LandingPage";
-import RoleSelect from "./components/pages/auth/RoleSelect";
 import Dashboard from "./components/pages/common/Dashboard";
-
-// Role-based Page Imports
 import ManageUniversities from "./components/pages/admin/ManageUniversities";
 import IssueCertificate from "./components/pages/university/IssueCertificate";
+import CertificateHistory from "./components/pages/university/CertificateHistory";
+import MyCertificates from "./components/pages/student/MyCertificates";
+import PublicHome from "./components/pages/common/Home";
+import RegisterStudent from "./components/pages/student/RegisterStudent";
+import StudentRequests from "./components/pages/university/StudentRequests";
+import VerifiedStudents from "./components/pages/university/VerifiedStudents";
+import UniversityAnalytics from "./components/pages/university/UniversityAnalytics";
+import VerifyCertificate from "./components/pages/recruiter/VerifyCertificate";
+import SharedCertificateViewer from "./components/pages/common/SharedCertificateViewer";
+import MessagingPage from "./components/messaging/MessagingPage";
 
-// ============================================
-// 3-Step Auth Flow Router
-// ============================================
 const RootRouter = () => {
-  const { walletAddress, role, isInitialized } = useAuth();
+  const { role, isStudentLike, isInitialized, isLoading, userConnected } = useAuth();
 
-  // Step 1: Loading state - show landing while initializing
-  if (!isInitialized) {
+  // Not initialized or loading → LandingPage
+  if (!isInitialized || isLoading) {
     return (
       <Routes>
         <Route path="*" element={<LandingPage />} />
@@ -27,68 +30,74 @@ const RootRouter = () => {
     );
   }
 
-  // Step 2: No wallet connected - show LandingPage
-  if (!walletAddress) {
+  // Not connected → public routes only
+  if (!userConnected) {
     return (
       <Routes>
+        <Route path="/verify" element={<VerifyCertificate />} />
+        <Route path="/certificate/:token" element={<SharedCertificateViewer />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
     );
   }
 
-  // Step 3: Wallet connected but no role - show RoleSelect
-  if (!role || role === "public") {
-    return (
-      <Routes>
-        <Route path="*" element={<RoleSelect />} />
-      </Routes>
-    );
-  }
-  
-
-  // Step 4: Wallet + Role exists - show role-specific pages wrapped in Layout
+  // Connected → protected routes
   return (
-    <Layout>
-      <Routes>
-        {/* Default redirect to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        {/* Common dashboard for all authenticated roles */}
+      <Route element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/home" element={role === "public" ? <PublicHome /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/register-student" element={<RegisterStudent />} />
+        <Route path="/verify" element={<VerifyCertificate />} />
 
-        {/* ADMIN Routes */}
-        {role === "admin" && (
-          <>
-            <Route path="/manage-universities" element={<ManageUniversities />} />
-          </>
-        )}
 
-        {/* UNIVERSITY Routes */}
-        {role === "university" && (
-          <>
-            <Route path="/issue" element={<IssueCertificate />} />
-            <Route path="/history" element={<DegreeHistory />} />
-          </>
-        )}
+        <Route
+          path="/manage-universities"
+          element={role === "admin" ? <ManageUniversities /> : <Navigate to="/dashboard" replace />}
+        />
 
-        {/* STUDENT Routes */}
-        {role === "student" && (
-          <>
-            <Route path="/my-degrees" element={<MyDegrees />} />
-          </>
-        )}
-        
+        <Route
+          path="/my-certificates"
+          element={isStudentLike ? <MyCertificates /> : <Navigate to="/dashboard" replace />}
+        />
 
-        {/* Invalid paths redirect to dashboard */}
+        <Route
+          path="/issue"
+          element={role === "university" ? <IssueCertificate /> : <Navigate to="/dashboard" replace />}
+        />
+
+        <Route
+          path="/history"
+          element={role === "university" ? <CertificateHistory /> : <Navigate to="/dashboard" replace />}
+        />
+
+        <Route
+          path="/student-requests"
+          element={role === "university" ? <StudentRequests /> : <Navigate to="/dashboard" replace />}
+        />
+
+        <Route
+          path="/verified-students"
+          element={role === "university" ? <VerifiedStudents /> : <Navigate to="/dashboard" replace />}
+        />
+
+        <Route
+          path="/university-analytics"
+          element={role === "university" ? <UniversityAnalytics /> : <Navigate to="/dashboard" replace />}
+        />
+
+        {/* Messaging route - permission check is done inside MessagingPage */}
+        <Route path="/messages" element={<MessagingPage />} />
+
+        {/* Catch-all: only for truly unknown paths */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </Layout>
+      </Route>
+    </Routes>
   );
 };
 
-// ============================================
-// Main App Component
-// ============================================
 function App() {
   return (
     <AuthProvider>
@@ -100,5 +109,3 @@ function App() {
 }
 
 export default App;
-
-App.jsx

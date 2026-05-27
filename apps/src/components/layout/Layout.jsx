@@ -1,32 +1,35 @@
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import SideBar from "./SideBar";
 import Footer from "./Footer";
+import FloatingAIChat from "../ai/FloatingAIChat";
 import { useAuth } from "../../context/AuthContext";
 
-const Layout = ({ children }) => {
-  const { walletAddress, role } = useAuth();
-  const safeRole = role || "Guest";
-  const shortenAddress = (addr) => (addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "Not connected");
+const Layout = () => {
+  const { userConnected } = useAuth();
+  const location = useLocation();
+  const isMessagesRoute = location.pathname === "/messages";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50/80">
       <Header />
       <SideBar />
-      <main className="pt-16 min-h-screen ml-64 p-8">
-        <div className="max-w-6xl mx-auto">{children}</div>
-      </main>
-      <Footer />
-
-      <div className="fixed bottom-4 right-4 bg-gray-900 text-white text-xs font-mono rounded-lg p-3 shadow-lg z-50 opacity-90 hover:opacity-100 transition">
-        <div className="space-y-1">
-          <p>
-            <span className="text-gray-400">Wallet:</span> {shortenAddress(walletAddress)}
-          </p>
-          <p>
-            <span className="text-gray-400">Role:</span> {safeRole}
-          </p>
-        </div>
+      {/* Content wrapper: offset by sidebar width + header height */}
+      <div className="ml-64 pt-16 min-h-screen flex flex-col transition-all duration-200">
+        <main className={`flex-1 pb-24 ${isMessagesRoute ? "p-0" : "p-6 lg:p-8"}`}>
+          {isMessagesRoute ? (
+            <Outlet />
+          ) : (
+            <div className="max-w-6xl mx-auto animate-fade-in">
+              <Outlet />
+            </div>
+          )}
+        </main>
+        <Footer />
       </div>
+
+      {/* Floating AI Chat - only for authenticated users */}
+      {userConnected && <FloatingAIChat />}
     </div>
   );
 };

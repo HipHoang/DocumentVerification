@@ -2,9 +2,9 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="fixed bottom-0 left-64 right-0 h-12 bg-white border-t flex items-center justify-center z-30">
+    <footer className="h-14 bg-white border-t border-gray-200/60 flex items-center justify-center shrink-0">
       <p className="text-xs text-gray-400">
-        © {currentYear} DocVerify - Blockchain Degree Verification
+        © {currentYear} DocVerify — Hệ thống xác thực văn bằng Blockchain
       </p>
     </footer>
   );
